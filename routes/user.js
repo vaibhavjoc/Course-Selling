@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const { default: mongoose } = require("mongoose");
 const JWT_SECRET = "rajgganniijanahaiThuje";
 const bcrypt = require("bcrypt");
+const {z} = require("zod");
+const dotenv = require("dotenv");
+dotenv.config();
 
 function userAuth() {
     const token = req.headers.token;
@@ -28,16 +31,31 @@ function userAuth() {
 }
 
 userRouter.post("/signup", async function (req, res) {
+    const requiredBody = z.object({
+            email: z.string().min(3).max(100).email(),
+            password: z.string()
+                .min(8, { message: "Password should have minimum length of 8" })
+                .max(15, "Password is too long")
+                .regex(/^(?=.*[A-Z]).{8,}$/, {
+                    message:
+                        "Should Contain at least one uppercase letter and have a minimum length of 8 characters.",
+                }),
+            firstName: z.string().min(3).max(100),
+            lastName: z.string().min(3).max(100)
+        });
+    
+        const parsedWithSuccess = requiredBody.safeParse(req.body);
+    
+        if (!parsedWithSuccess.success) {
+            return res.json({
+                message: "Invalid Format"
+            });
+        }
+
     const email = req.body.email;
     const password = req.body.password;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
-
-    if (!email || !password) {
-        return res.json({
-            message: "Email and Password can't be empty"
-        })
-    }
 
     const hashedPassword = await bcrypt.hash(password, 5)
 
@@ -56,12 +74,6 @@ userRouter.post("/signup", async function (req, res) {
 userRouter.post("/signin", async function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
-
-    if (!email) {
-        return res.json({
-            message: "Email can't be empty"
-        })
-    }
 
     const response = await UserModel.findOne({
         email: email,
