@@ -93,14 +93,17 @@ adminRouter.post("/signin", async function (req, res) {
         }, process.env.JWT_ADMIN_SECRET);
 
         res.json({
-            token,
-            message: "You are logged in successfully as Admin"
+            token
         })
     } else {
         res.status(403).json({
             message: "Invalid Credentials"
         })
     }
+
+    res.json({
+        message: "You are Logged In successfully"
+    })
 });
 
 module.exports = {
