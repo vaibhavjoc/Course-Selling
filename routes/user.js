@@ -8,27 +8,7 @@ const {z} = require("zod");
 const dotenv = require("dotenv");
 dotenv.config();
 
-function userAuth() {
-    const token = req.headers.token;
-
-    if (!token) {
-        return res.json({
-            message: "No token Provided"
-        })
-    }
-
-    try {
-        const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-
-        req.userId = decodedData.id
-    } catch (error) {
-        res.json({
-            message: "Invalid Token Provided"
-        })
-        console.log(error)
-    }
-
-}
+const { userMiddleware } = require("./middlewares/userMiddleware")
 
 userRouter.post("/signup", async function (req, res) {
     const requiredBody = z.object({
