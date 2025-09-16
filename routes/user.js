@@ -75,21 +75,21 @@ userRouter.post("/signin", async function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
-    const response = await UserModel.findOne({
+    const user = await UserModel.findOne({
         email: email,
     });
 
-    if (!response) {
+    if (!user) {
         return res.status(403).json({
             message: "No User Found"
         })
     }
 
-    const passwordMatched = bcrypt.compare(password, response.password)
+    const passwordMatched = bcrypt.compare(password, user.password)
 
     if (passwordMatched) {
         const token = jwt.sign({
-            id: response._id
+            id: user._id
         }, process.env.JWT_SECRET);
 
         res.json({

@@ -6,7 +6,7 @@ dotenv.config();
 const bcrypt = require("bcrypt");
 const { z } = require("zod");
 
-const { adminModel, AdminModel } = require("../db");
+const { AdminModel } = require("../db");
 
 function adminAuth() {
     const token = req.headers.token;
@@ -75,21 +75,21 @@ adminRouter.post("/signin", async function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
-    const response = await AdminModel.findOne({
+    const admin = await AdminModel.findOne({
         email: email
     });
 
-    if (!response) {
+    if (!admin) {
         return res.json({
             message: "This Admin User does not exist"
         })
     }
 
-    const passwordMatched = await bcrypt.compare(password, response.password);
+    const passwordMatched = await bcrypt.compare(password, admin.password);
 
     if (passwordMatched) {
         const token = jwt.sign({
-            id: response._id
+            id: admin._id
         }, process.env.JWT_ADMIN_SECRET);
 
         res.json({
