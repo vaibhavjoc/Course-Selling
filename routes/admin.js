@@ -7,7 +7,8 @@ const bcrypt = require("bcrypt");
 const { z } = require("zod");
 
 const { AdminModel, CourseModel } = require("../db");
-const { adminMiddleware } = require("./middlewares/adminMiddleware")
+const { adminMiddleware } = require("./middlewares/adminMiddleware");
+const course = require("./course");
 
 adminRouter.post("/signup", async function (req, res) {
     const requiredBody = z.object({
@@ -103,6 +104,39 @@ adminRouter.post("/course", adminMiddleware, async function (req, res) {
         courseId: course._id
     })
 });
+
+adminRouter.put("/course", adminMiddleware, async function (req, res) {
+    const adminId = req.userId;
+
+    const { title, description, price, imageUrl, courseId } = req.body;
+
+    const course = await CourseModel.updateOne({
+        _id: courseId,
+        creatorId: adminId
+    }, {
+        title: title,
+        description: description,
+        price: price,
+        imageUrl: imageUrl
+    });
+
+     res.json({
+        message: "Course updated",
+        courseId: course._id
+    })
+})
+
+adminRouter.get("/course/bulk", adminMiddleware, async function (req, res) {
+    const adminId = req.userId;
+
+    const courses = await CourseModel.find({
+        creatorId: adminId
+    });
+
+    res.json({
+        courses
+    })
+})
 
 module.exports = {
     adminRouter: adminRouter
