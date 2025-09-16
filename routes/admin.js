@@ -6,29 +6,8 @@ dotenv.config();
 const bcrypt = require("bcrypt");
 const { z } = require("zod");
 
-const { AdminModel } = require("../db");
-
-function adminAuth() {
-    const token = req.headers.token;
-
-    if (!token) {
-        return res.json({
-            message: "No token Provided"
-        })
-    }
-
-    try {
-        const decodedData = jwt.verify(token, process.env.JWT_ADMIN_SECRET);
-
-        req.userId = decodedData.id
-    } catch (error) {
-        res.json({
-            message: "Invalid Token Provided"
-        })
-        console.log(error)
-    }
-
-}
+const { AdminModel, CourseModel } = require("../db");
+const { adminMiddleware } = require("./middlewares/adminMiddleware")
 
 adminRouter.post("/signup", async function (req, res) {
     const requiredBody = z.object({
@@ -106,7 +85,25 @@ adminRouter.post("/signin", async function (req, res) {
     })
 });
 
+adminRouter.post("/course", adminMiddleware, async function (req, res) {
+    const adminId = req.userId;
+
+    const { title, description, price, imageUrl } = req.body;
+
+    const course = await CourseModel.create({
+        title: title,
+        description: description,
+        price: price,
+        imageUrl: imageUrl,
+        creatorId: adminId
+    });
+
+    res.json({
+        message: "Course created",
+        courseId: course._id
+    })
+});
+
 module.exports = {
     adminRouter: adminRouter
 }
-
