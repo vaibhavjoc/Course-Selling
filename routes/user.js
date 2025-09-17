@@ -8,6 +8,7 @@ const {z} = require("zod");
 const dotenv = require("dotenv");
 dotenv.config();
 
+const { UserModel, CourseModel, PurchaseModel } = require("../db");
 const { userMiddleware } = require("./middlewares/userMiddleware")
 
 userRouter.post("/signup", async function (req, res) {
@@ -86,8 +87,16 @@ userRouter.post("/signin", async function (req, res) {
     })
 });
 
-userRouter.get("/purchases", function (req, res) {
+userRouter.get("/purchases", userMiddleware, async function (req, res) {
+    const userId = req.userId;
 
+     const purchases = await PurchaseModel.find({
+        userId
+     });
+
+     res.json({
+        purchases
+     })
 });
 
 module.exports = {
