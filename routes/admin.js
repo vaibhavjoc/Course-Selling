@@ -8,7 +8,6 @@ const { z } = require("zod");
 
 const { AdminModel, CourseModel } = require("../db");
 const { adminMiddleware } = require("./middlewares/adminMiddleware");
-const course = require("./course");
 
 adminRouter.post("/signup", async function (req, res) {
     const requiredBody = z.object({
